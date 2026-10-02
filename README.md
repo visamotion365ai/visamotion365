@@ -90,3 +90,36 @@ lib/
   browserUse.ts     Browser Use Cloud API wrapper
   chat.ts           Streaming chat engine (mock, swappable)
 ```
+
+## Mobile app + PWA
+
+The same app ships a phone layout that mirrors the reference "Visa AI" design:
+
+- Sticky header (menu · logo · profile), slide-out drawer (Home, Applications,
+  AI Assistant, Travel, Visa Guide, Documents, Notifications, Profile, Settings,
+  Dark Mode) and a multi-step **New Visa Application** form with real flag cards.
+- **Dark mode** is a real toggle, persisted to `localStorage` (`visamotion_theme`).
+- **Installable PWA**: `public/manifest.json`, `public/sw.js` (network-first) and
+  the icons in `public/icons/`. On Android/desktop Chrome the install prompt
+  appears; iOS users get Add-to-Home-Screen steps.
+
+## How the single prompt works
+
+The composer's default mode is **Browser Agent Cloud v4**, so one prompt launches
+a real Browser Use Cloud task, then polls it and streams the status + output into
+the thread. If no key is present it falls back to the AI agent (Base44, otherwise
+a built-in agent) with a clear message. Base44 is used as the reasoning engine for
+the non-browser modes.
+
+## Server-side keys (optional)
+
+Instead of pasting keys in Settings you can set them on the host (Vercel →
+Environment Variables), and the app will use them automatically:
+
+| Variable | Purpose |
+|----------|---------|
+| `BROWSER_USE_API_KEY` | Real Browser Use Cloud runs |
+| `BASE44_API_KEY` | Base44 AI-agent key |
+| `BASE44_ENDPOINT` | Base44 workflow endpoint (HTTPS) |
+
+See `.env.example`. Nothing is ever logged or committed.

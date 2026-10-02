@@ -72,11 +72,17 @@ export async function POST(request: NextRequest) {
     return fail("Send a JSON body.");
   }
 
-  const apiKey = String(body.apiKey ?? "").trim();
+  const apiKey =
+    String(body.apiKey ?? "").trim() || (process.env.BROWSER_USE_API_KEY ?? "").trim();
   const task = String(body.task ?? "").trim();
   const proxyCountryCode = String(body.proxyCountryCode ?? "us");
 
-  if (!apiKey) return fail("Add your Browser Use API key in Settings first.", 401);
+  if (!apiKey) {
+    return fail(
+      "Add your Browser Use API key in Settings, or set BROWSER_USE_API_KEY on the server.",
+      401,
+    );
+  }
   if (task.length < 8 || task.length > 2000) {
     return fail("Task must be between 8 and 2000 characters.");
   }
@@ -144,9 +150,10 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   const params = request.nextUrl.searchParams;
   const taskId = params.get("taskId") ?? "";
-  const apiKey = (params.get("apiKey") ?? "").trim();
+  const apiKey =
+    (params.get("apiKey") ?? "").trim() || (process.env.BROWSER_USE_API_KEY ?? "").trim();
 
-  if (!apiKey) return fail("Missing Browser Use API key.", 401);
+  if (!apiKey) return fail("Add your Browser Use API key in Settings, or set BROWSER_USE_API_KEY.", 401);
   if (!taskId) return fail("Missing taskId.");
 
   const headers = {

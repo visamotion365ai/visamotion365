@@ -1,0 +1,25 @@
+{
+  "name": "VisaMotion 365 — Agentic AI Visa Workspace",
+  "short_name": "VisaMotion 365",
+  "description": "Five autonomous AI agents for visa eligibility, document audit, SOP drafting, refusal analysis and embassy portal checks.",
+  "id": "/",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
+  "background_color": "#0b1020",
+  "theme_color": "#0b1020",
+  "categories": ["productivity", "travel", "utilities"],
+  "lang": "en",
+  "dir": "ltr",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Assess eligibility", "short_name": "Eligibility", "url": "/?action=eligibility" },
+    { "name": "New case", "short_name": "New case", "url": "/?action=new" }
+  ]
+}
