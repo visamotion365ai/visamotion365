@@ -17,32 +17,141 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Liquid-glass background: soft aurora blobs behind frosted surfaces. */
-.vm-aurora {
+/* ---------------------------------------------------------------
+   All-time animated, dynamic-colour wave background.
+   Three blurred, morphing gradient waves drift across each other
+   while the whole field slowly cycles hue, so the colour is never
+   static. Runs continuously behind every screen.
+   --------------------------------------------------------------- */
+.vm-wavefield {
   position: fixed;
-  inset: -10%;
+  inset: 0;
   z-index: 0;
+  overflow: hidden;
   pointer-events: none;
-  background:
-    radial-gradient(38% 34% at 12% 8%, rgba(16, 185, 129, 0.24), transparent 62%),
-    radial-gradient(32% 30% at 88% 12%, rgba(56, 189, 248, 0.24), transparent 62%),
-    radial-gradient(34% 32% at 78% 92%, rgba(139, 92, 246, 0.20), transparent 62%),
-    radial-gradient(30% 28% at 22% 96%, rgba(244, 114, 182, 0.16), transparent 62%);
-  filter: blur(30px) saturate(120%);
-  animation: vm-drift 26s ease-in-out infinite alternate;
+  background: #ffffff;
+  animation: vm-hue 22s linear infinite;
 }
 
-@keyframes vm-drift {
+.vm-wave {
+  position: absolute;
+  inset: -28%;
+  background-size: 240% 240%;
+  filter: blur(78px) saturate(120%);
+  will-change: transform, background-position, border-radius;
+  background-repeat: no-repeat;
+}
+
+.vm-wave-a {
+  background-image: linear-gradient(
+    115deg,
+    rgba(52, 211, 153, 0.8),
+    rgba(56, 189, 248, 0.58) 34%,
+    rgba(167, 139, 250, 0.66) 66%,
+    rgba(52, 211, 153, 0.8)
+  );
+  border-radius: 42% 58% 60% 40% / 46% 54% 46% 54%;
+  opacity: 0.82;
+  animation:
+    vm-morph 17s ease-in-out infinite alternate,
+    vm-slide 24s linear infinite;
+}
+
+.vm-wave-b {
+  background-image: linear-gradient(
+    75deg,
+    rgba(56, 189, 248, 0.75),
+    rgba(244, 114, 182, 0.55) 38%,
+    rgba(251, 191, 36, 0.5) 70%,
+    rgba(56, 189, 248, 0.75)
+  );
+  border-radius: 58% 42% 38% 62% / 52% 46% 54% 48%;
+  opacity: 0.68;
+  animation:
+    vm-morph 22s ease-in-out infinite alternate-reverse,
+    vm-slide 32s linear infinite reverse;
+}
+
+.vm-wave-c {
+  background-image: linear-gradient(
+    150deg,
+    rgba(167, 139, 250, 0.72),
+    rgba(16, 185, 129, 0.55) 44%,
+    rgba(56, 189, 248, 0.62) 74%,
+    rgba(167, 139, 250, 0.72)
+  );
+  border-radius: 50% 50% 42% 58% / 60% 40% 60% 40%;
+  opacity: 0.6;
+  animation:
+    vm-morph 27s ease-in-out infinite alternate,
+    vm-slide 28s linear infinite;
+}
+
+/* Soft white haze keeps foreground text crisp over the colours. */
+.vm-haze {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      130% 100% at 50% 42%,
+      rgba(255, 255, 255, 0.5),
+      rgba(255, 255, 255, 0.72) 100%
+    );
+}
+
+@keyframes vm-slide {
   0% {
-    transform: translate3d(0, 0, 0) scale(1);
+    background-position: 0% 50%;
   }
   100% {
-    transform: translate3d(0, -2.5%, 0) scale(1.06);
+    background-position: 200% 50%;
   }
+}
+
+@keyframes vm-morph {
+  0% {
+    transform: translate3d(-3%, -2%, 0) rotate(-5deg) scale(1.02);
+    border-radius: 42% 58% 60% 40% / 46% 54% 46% 54%;
+  }
+  50% {
+    transform: translate3d(3%, 2%, 0) rotate(4deg) scale(1.09);
+    border-radius: 58% 42% 42% 58% / 54% 46% 54% 46%;
+  }
+  100% {
+    transform: translate3d(-2%, 3%, 0) rotate(-3deg) scale(1.04);
+    border-radius: 46% 54% 56% 44% / 42% 58% 42% 58%;
+  }
+}
+
+@keyframes vm-hue {
+  from {
+    filter: hue-rotate(0deg);
+  }
+  to {
+    filter: hue-rotate(360deg);
+  }
+}
+
+/* Frosted liquid-glass surface for the upper content section. */
+.vm-glass {
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: linear-gradient(
+    158deg,
+    rgba(255, 255, 255, 0.88),
+    rgba(255, 255, 255, 0.62)
+  );
+  box-shadow:
+    0 28px 80px -24px rgba(15, 32, 24, 0.34),
+    0 6px 20px -10px rgba(15, 32, 24, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(34px) saturate(150%);
+  -webkit-backdrop-filter: blur(34px) saturate(150%);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .vm-aurora {
+  .vm-wavefield,
+  .vm-wave {
     animation: none;
   }
 }

@@ -4,46 +4,15 @@ import { useEffect, useRef, useState } from "react";
 import Sidebar from "@/components/Sidebar";
 import ActiveAgentBadge from "@/components/ActiveAgentBadge";
 import HeroInput from "@/components/HeroInput";
-import ActionGrid from "@/components/ActionGrid";
 import ChatThread from "@/components/ChatThread";
 import SettingsModal from "@/components/SettingsModal";
 import CloudTasksPanel from "@/components/CloudTasksPanel";
 import DocumentVault from "@/components/DocumentVault";
 import SearchOverlay from "@/components/SearchOverlay";
-import { FILTER_CHIPS, getAgent, type AgentId, type ChatMode, type QuickAction } from "@/lib/agents";
+import { getAgent, type AgentId, type ChatMode } from "@/lib/agents";
 import { createMessage, streamChat } from "@/lib/chat";
 import { createBrowserTask } from "@/lib/browserUse";
 import { useStore, type Attachment } from "@/lib/store";
-
-/** Map a filter chip to an agent + prompt + mode. */
-const CHIP_RECIPES: Record<string, { agentId: AgentId; prompt: string; mode?: ChatMode }> = {
-  "Assess Eligibility": {
-    agentId: "strategist",
-    prompt: "Assess this applicant's eligibility. Profile: age, education, language score, work experience, target country.",
-  },
-  "Audit Documents": {
-    agentId: "auditor",
-    prompt: "Audit my document checklist and return PASS / FAIL / MISSING for each item. Documents: ",
-  },
-  "Generate SOP": {
-    agentId: "writer",
-    prompt: "Draft a statement of purpose. Background: ",
-  },
-  "Analyze Refusal": {
-    agentId: "forensic",
-    prompt: "Analyze this refusal letter and build a re-application rebuttal. Refusal text: ",
-  },
-  "Check Embassy Slots": {
-    agentId: "portal",
-    prompt: "Check the earliest available appointment slot on the official portal for this country and visa type.",
-    mode: "browser",
-  },
-  "Cloud Browser Agent": {
-    agentId: "portal",
-    prompt: "Launch a cloud browser task to verify the current official portal guidelines and appointment information.",
-    mode: "browser",
-  },
-};
 
 const uid = () =>
   typeof crypto !== "undefined" && "randomUUID" in crypto
@@ -65,7 +34,6 @@ export default function Home() {
   const addCloudTask = useStore((s) => s.addCloudTask);
   const addAttachment = useStore((s) => s.addAttachment);
   const removeAttachment = useStore((s) => s.removeAttachment);
-  const setSettingsOpen = useStore((s) => s.setSettingsOpen);
   const setTasksPanelOpen = useStore((s) => s.setTasksPanelOpen);
 
   const [input, setInput] = useState("");
@@ -100,19 +68,6 @@ export default function Home() {
 
   const prefill = (text: string) => setInput(text);
   const selectAgent = (id: AgentId) => setActiveAgent(id);
-
-  const applyChip = (chip: string) => {
-    const recipe = CHIP_RECIPES[chip];
-    if (!recipe) return;
-    setActiveAgent(recipe.agentId);
-    setInput(recipe.prompt);
-    if (recipe.mode) setMode(recipe.mode);
-  };
-
-  const applyAction = (action: QuickAction) => {
-    setActiveAgent(action.agentId);
-    setInput(action.prompt);
-  };
 
   const send = async () => {
     const text = input.trim();
@@ -185,104 +140,72 @@ export default function Home() {
   };
 
   return (
-    <div className="relative flex h-screen w-full overflow-hidden bg-white">
-      <div className="vm-aurora" aria-hidden />
+    <div className="relative flex h-[100dvh] w-full overflow-hidden bg-white">
+      {/* All-time animated, dynamic-colour wave background */}
+      <div className="vm-wavefield" aria-hidden>
+        <span className="vm-wave vm-wave-a" />
+        <span className="vm-wave vm-wave-b" />
+        <span className="vm-wave vm-wave-c" />
+        <span className="vm-haze" />
+      </div>
+
       <Sidebar />
 
-      <main
-        className={`relative flex min-h-screen flex-1 flex-col items-center bg-transparent px-4 ${
-          hasConversation ? "overflow-hidden" : "overflow-y-auto"
-        }`}
-      >
-        {hasConversation ? (
-          <>
-            {/* Conversation layout */}
-            <div className="w-full flex-1 overflow-y-auto px-4 pb-4 pt-10">
-              <ChatThread messages={messages} isStreaming={isStreaming} />
-            </div>
-            <div className="w-full border-t border-transparent bg-white px-4 pb-5 pt-2">
-              <div className="mx-auto mb-2 flex max-w-[720px] items-center justify-between">
-                <ActiveAgentBadge />
-                <div className="flex items-center gap-4">
-                  <span className="text-xs text-neutral-400">
-                    {agent.shortName}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={resetChat}
-                    className="text-xs text-neutral-500 transition-colors hover:text-neutral-900"
-                  >
-                    New case
-                  </button>
-                </div>
+      <main className="relative z-10 flex h-[100dvh] min-h-0 flex-1 flex-col">
+        {/* Upper section — liquid glass with shadow */}
+        <section className="relative flex min-h-0 flex-1 flex-col p-3 sm:p-5">
+          {hasConversation ? (
+            <div className="vm-glass flex min-h-0 flex-1 flex-col overflow-hidden rounded-[34px]">
+              <div className="w-full flex-1 overflow-y-auto px-4 pb-6 pt-8 sm:px-8">
+                <ChatThread messages={messages} isStreaming={isStreaming} />
               </div>
-              <HeroInput
-                value={input}
-                onChange={setInput}
-                onSubmit={send}
-                files={composerFiles}
-                onAddFiles={handleAddFiles}
-                onRemoveFile={handleRemoveFile}
-                mode={mode}
-                onModeChange={setMode}
-                disabled={isStreaming}
-              />
             </div>
-          </>
-        ) : (
-          /* Empty hero state */
-          <div className="my-auto w-full max-w-[820px] py-10">
-            <h1 className="mb-8 text-center text-3xl font-normal tracking-tight text-neutral-900 sm:text-[40px]">
-              Where should we start?
-            </h1>
-
-            <ActiveAgentBadge />
-
-            <HeroInput
-              value={input}
-              onChange={setInput}
-              onSubmit={send}
-              files={composerFiles}
-              onAddFiles={handleAddFiles}
-              onRemoveFile={handleRemoveFile}
-              mode={mode}
-              onModeChange={setMode}
-              disabled={isStreaming}
-              autoFocus
-            />
-
-            {/* Filter chips */}
-            <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-              {FILTER_CHIPS.map((chip) => (
-                <button
-                  key={chip}
-                  type="button"
-                  onClick={() => applyChip(chip)}
-                  className="rounded-full border border-neutral-200 bg-white px-4 py-1.5 text-sm text-neutral-600 transition-colors hover:border-neutral-300 hover:bg-neutral-50"
-                >
-                  {chip}
-                </button>
-              ))}
-            </div>
-
-            <ActionGrid onSelect={applyAction} />
-
-            {!config.browserUseKey && (
-              <div className="mx-auto mt-6 flex max-w-[720px] items-center justify-between gap-3 rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3">
-                <p className="text-xs text-neutral-600">
-                  Add your Browser Use Cloud key to enable real autonomous browser tasks.
+          ) : (
+            <div className="vm-glass flex min-h-0 flex-1 items-center justify-center rounded-[34px] px-6 py-10">
+              <div className="w-full max-w-[620px] text-center">
+                <h1 className="text-[34px] font-normal leading-tight tracking-tight text-neutral-900 sm:text-[46px]">
+                  Where should we start?
+                </h1>
+                <p className="mx-auto mt-4 max-w-[480px] text-[15px] leading-relaxed text-neutral-500">
+                  Five autonomous immigration agents — eligibility, document audit,
+                  SOP drafting, refusal analysis and embassy portals. Describe the
+                  applicant or attach a file below.
                 </p>
-                <button
-                  type="button"
-                  onClick={() => setSettingsOpen(true)}
-                  className="shrink-0 rounded-full bg-black px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-neutral-800"
-                >
-                  Open Settings
-                </button>
               </div>
-            )}
+            </div>
+          )}
+        </section>
+
+        {/* Prompt box — pinned to the very bottom */}
+        <div className="relative w-full shrink-0 px-3 pb-4 pt-1 sm:px-5 sm:pb-6">
+          <div className="mx-auto mb-2 flex max-w-[720px] items-center justify-between px-1">
+            <ActiveAgentBadge />
+            <div className="flex items-center gap-4">
+              <span className="hidden text-xs text-neutral-400 sm:inline">
+                {agent.shortName}
+              </span>
+              <button
+                type="button"
+                onClick={resetChat}
+                className="whitespace-nowrap text-xs text-neutral-500 transition-colors hover:text-neutral-900"
+              >
+                New case
+              </button>
+            </div>
           </div>
-        )}
+          <HeroInput
+            value={input}
+            onChange={setInput}
+            onSubmit={send}
+            files={composerFiles}
+            onAddFiles={handleAddFiles}
+            onRemoveFile={handleRemoveFile}
+            mode={mode}
+            onModeChange={setMode}
+            disabled={isStreaming}
+            autoFocus={!hasConversation}
+          />
+        </div>
       </main>
 
       <SettingsModal />
