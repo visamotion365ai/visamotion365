@@ -156,7 +156,11 @@ export default function SettingsModal() {
             </div>
             <Field
               label="BROWSER_USE_API_KEY"
-              hint={browserKeyValid ? "Used for autonomous browser runs and slot checks." : "Key should start with bu_."}
+              hint={
+                browserKeyValid
+                  ? "Used for autonomous browser runs and slot checks. Leave blank to use a server BROWSER_USE_API_KEY."
+                  : "Key should start with bu_."
+              }
             >
               <div className="flex gap-2">
                 <input
@@ -192,7 +196,10 @@ export default function SettingsModal() {
               />
             </div>
             <div className="space-y-3">
-              <Field label="Base44 API Key">
+              <Field
+                label="Base44 API Key"
+                hint="Drives the AI-agent answers. Leave blank to use a server BASE44_API_KEY."
+              >
                 <input
                   type={reveal ? "text" : "password"}
                   value={config.base44Key}

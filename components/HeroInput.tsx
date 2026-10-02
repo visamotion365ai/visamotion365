@@ -79,7 +79,7 @@ export default function HeroInput({
   const currentMode = CHAT_MODES.find((m) => m.id === mode) ?? CHAT_MODES[0];
 
   return (
-    <div className="mx-auto w-full max-w-[720px] rounded-[28px] border border-white/70 bg-white/70 p-3 shadow-[0_16px_50px_-12px_rgba(15,32,24,0.3)] backdrop-blur-2xl transition-all duration-200 focus-within:shadow-[0_20px_60px_-12px_rgba(15,32,24,0.4)]">
+    <div className="vm-composer mx-auto w-full max-w-[720px] rounded-[28px] border border-white/70 bg-white/70 p-3 shadow-[0_16px_50px_-12px_rgba(15,32,24,0.3)] backdrop-blur-2xl transition-all duration-200 focus-within:shadow-[0_20px_60px_-12px_rgba(15,32,24,0.4)]">
       {/* Attachment chips live inside the composer, above the textarea */}
       {files.length > 0 && (
         <div className="mb-2 flex flex-wrap gap-2 px-1">
