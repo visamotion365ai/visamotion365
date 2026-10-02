@@ -38,7 +38,7 @@ export default function AgentSelector() {
       ref={ref}
       role="dialog"
       aria-label="Choose an agent"
-      className="animate-fade-up fixed left-[76px] top-1/2 z-50 w-[340px] -translate-y-1/2 overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-lg"
+      className="animate-fade-up fixed left-[76px] top-1/2 z-50 w-[340px] -translate-y-1/2 overflow-hidden rounded-2xl border border-neutral-200/70 bg-white/70 shadow-2xl backdrop-blur-2xl"
     >
       <div className="border-b border-neutral-100 px-4 py-3">
         <p className="text-sm font-medium text-neutral-900">Autonomous agents</p>

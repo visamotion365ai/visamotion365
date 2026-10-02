@@ -30,8 +30,8 @@ function NavButton({ icon: Icon, label, onClick, active, badge }: NavButtonProps
         onClick={onClick}
         className={`relative flex h-11 w-11 items-center justify-center rounded-xl transition-colors ${
           active
-            ? "bg-neutral-100 text-black"
-            : "text-neutral-500 hover:bg-neutral-100 hover:text-black"
+            ? "bg-white/80 text-black shadow-sm"
+            : "text-neutral-500 hover:bg-white/70 hover:text-black"
         }`}
       >
         <Icon size={22} strokeWidth={1.8} />
@@ -60,7 +60,7 @@ export default function Sidebar() {
   const activeAgent = getAgent(activeAgentId);
 
   return (
-    <aside className="relative z-40 flex h-screen w-[64px] flex-col items-center justify-between border-r border-neutral-200 bg-white py-4">
+    <aside className="relative z-40 flex h-screen w-[64px] flex-col items-center justify-between border-r border-neutral-200/70 bg-white/60 py-4 backdrop-blur-2xl">
       {/* Logo */}
       <div className="group/nav relative flex items-center">
         <button
@@ -93,8 +93,8 @@ export default function Sidebar() {
               onClick={() => toggleAgentSelector(!agentSelectorOpen)}
               className={`relative flex h-11 w-11 items-center justify-center rounded-xl transition-colors ${
                 agentSelectorOpen
-                  ? "bg-neutral-100 text-black"
-                  : "text-neutral-500 hover:bg-neutral-100 hover:text-black"
+                  ? "bg-white/80 text-black shadow-sm"
+                  : "text-neutral-500 hover:bg-white/70 hover:text-black"
               }`}
             >
               <Bot size={22} strokeWidth={1.8} />

@@ -35,9 +35,9 @@ export default function ActionGrid({ onSelect }: ActionGridProps) {
             key={action.id}
             type="button"
             onClick={() => onSelect(action)}
-            className="group cursor-pointer rounded-2xl border border-neutral-200 bg-white p-4 text-left transition-all hover:border-neutral-300 hover:shadow-sm"
+            className="group cursor-pointer rounded-2xl border border-neutral-200/70 bg-white/50 p-4 text-left shadow-[0_6px_24px_rgba(15,32,24,0.05)] backdrop-blur-xl transition-all hover:border-neutral-300 hover:bg-white/75 hover:shadow-lg"
           >
-            <span className="mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-neutral-100 text-neutral-700 transition-colors group-hover:bg-neutral-900 group-hover:text-white">
+            <span className="mb-2 flex h-8 w-8 items-center justify-center rounded-full border border-neutral-200/70 bg-white/70 text-neutral-700 backdrop-blur transition-colors group-hover:bg-neutral-900 group-hover:text-white">
               <Icon size={17} strokeWidth={1.8} />
             </span>
             <span className="block text-sm font-medium text-neutral-900">

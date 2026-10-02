@@ -20,7 +20,7 @@ export default function DocumentVault() {
 
   return (
     <div
-      className="fixed inset-0 z-[55] flex items-center justify-center bg-black/20 p-4 backdrop-blur-[1px]"
+      className="fixed inset-0 z-[55] flex items-center justify-center bg-black/10 p-4 backdrop-blur-md"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) setOpen(false);
       }}
@@ -29,7 +29,7 @@ export default function DocumentVault() {
         role="dialog"
         aria-modal="true"
         aria-label="Document vault"
-        className="max-h-[85vh] w-full max-w-[560px] overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-xl"
+        className="max-h-[85vh] w-full max-w-[560px] overflow-hidden rounded-2xl border border-neutral-200/70 bg-white/80 shadow-2xl backdrop-blur-2xl"
       >
         <header className="flex items-center justify-between border-b border-neutral-100 px-5 py-4">
           <div className="flex items-center gap-3">

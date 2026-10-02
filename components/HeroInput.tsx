@@ -79,14 +79,14 @@ export default function HeroInput({
   const currentMode = CHAT_MODES.find((m) => m.id === mode) ?? CHAT_MODES[0];
 
   return (
-    <div className="mx-auto w-full max-w-[720px] rounded-[28px] border border-neutral-200 bg-white p-3 shadow-sm transition-all duration-200 focus-within:shadow-md">
+    <div className="mx-auto w-full max-w-[720px] rounded-[28px] border border-neutral-200/70 bg-white/55 p-3 shadow-[0_8px_30px_rgba(15,32,24,0.08)] backdrop-blur-2xl transition-all duration-200 focus-within:shadow-[0_12px_44px_rgba(15,32,24,0.16)]">
       {/* Attachment chips live inside the composer, above the textarea */}
       {files.length > 0 && (
         <div className="mb-2 flex flex-wrap gap-2 px-1">
           {files.map((file) => (
             <span
               key={file.id}
-              className="flex items-center gap-2 rounded-full bg-neutral-100 px-3 py-1 text-sm text-neutral-700"
+              className="flex items-center gap-2 rounded-full border border-neutral-200/70 bg-white/70 px-3 py-1 text-sm text-neutral-700 backdrop-blur"
             >
               <Paperclip size={13} className="text-neutral-400" />
               <span className="max-w-[220px] truncate">{file.name}</span>
@@ -121,7 +121,7 @@ export default function HeroInput({
             type="button"
             aria-label="Attach document"
             onClick={() => fileRef.current?.click()}
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-500 transition-colors hover:bg-neutral-50 hover:text-neutral-900"
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-neutral-200/70 bg-white/70 text-neutral-500 backdrop-blur transition-colors hover:bg-white/90 hover:text-neutral-900"
           >
             <Paperclip size={16} />
           </button>
@@ -141,7 +141,7 @@ export default function HeroInput({
             <button
               type="button"
               onClick={() => setModeOpen((open) => !open)}
-              className="flex items-center gap-1.5 whitespace-nowrap rounded-full bg-neutral-100 px-3 py-1.5 text-sm text-neutral-600 transition-colors hover:bg-neutral-200/70"
+              className="flex items-center gap-1.5 whitespace-nowrap rounded-full border border-neutral-200/70 bg-white/70 px-3 py-1.5 text-sm text-neutral-600 backdrop-blur transition-colors hover:bg-white/90"
             >
               <span className="hidden sm:inline">{currentMode.label}</span>
               <span className="sm:hidden">{currentMode.short}</span>
@@ -150,7 +150,7 @@ export default function HeroInput({
             {modeOpen && (
               <>
                 <div className="fixed inset-0 z-10" onClick={() => setModeOpen(false)} />
-                <div className="absolute bottom-full right-0 z-20 mb-2 w-56 overflow-hidden rounded-xl border border-neutral-200 bg-white py-1 shadow-lg">
+                <div className="absolute bottom-full right-0 z-20 mb-2 w-56 overflow-hidden rounded-xl border border-neutral-200/70 bg-white/80 py-1 shadow-2xl backdrop-blur-2xl">
                   {CHAT_MODES.map((option) => (
                     <button
                       key={option.id}
@@ -161,7 +161,7 @@ export default function HeroInput({
                       }}
                       className={`block w-full px-3 py-2 text-left text-sm transition-colors ${
                         option.id === mode
-                          ? "bg-neutral-100 text-neutral-900"
+                          ? "bg-white/90 text-neutral-900"
                           : "text-neutral-600 hover:bg-neutral-50"
                       }`}
                     >

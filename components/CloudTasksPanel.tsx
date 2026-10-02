@@ -40,12 +40,12 @@ export default function CloudTasksPanel() {
 
   return (
     <div
-      className="fixed inset-0 z-[55] flex justify-end bg-black/20 backdrop-blur-[1px]"
+      className="fixed inset-0 z-[55] flex justify-end bg-black/10 backdrop-blur-md"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) setOpen(false);
       }}
     >
-      <aside className="flex h-full w-full max-w-[440px] flex-col border-l border-neutral-200 bg-white shadow-xl">
+      <aside className="flex h-full w-full max-w-[440px] flex-col border-l border-neutral-200/70 bg-white/75 shadow-2xl backdrop-blur-2xl">
         <header className="flex items-center justify-between border-b border-neutral-100 px-5 py-4">
           <div className="flex items-center gap-3">
             <span className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-100">

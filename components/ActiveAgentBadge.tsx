@@ -17,7 +17,7 @@ export default function ActiveAgentBadge() {
     <button
       type="button"
       onClick={() => setAgentSelectorOpen(true)}
-      className="mx-auto mb-4 flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-600 transition-colors hover:bg-neutral-200/70"
+      className="mx-auto mb-4 flex items-center gap-2 rounded-full border border-neutral-200/70 bg-white/60 px-3 py-1 text-xs font-medium text-neutral-600 backdrop-blur-xl transition-colors hover:bg-white/85"
     >
       <span className={`h-1.5 w-1.5 rounded-full ${agent.accentText.replace("text-", "bg-")}`} />
       Active: Agent {agent.index} — {agent.shortName}

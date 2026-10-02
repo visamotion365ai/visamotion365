@@ -17,6 +17,36 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Liquid-glass background: soft aurora blobs behind frosted surfaces. */
+.vm-aurora {
+  position: fixed;
+  inset: -10%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(38% 34% at 12% 8%, rgba(16, 185, 129, 0.24), transparent 62%),
+    radial-gradient(32% 30% at 88% 12%, rgba(56, 189, 248, 0.24), transparent 62%),
+    radial-gradient(34% 32% at 78% 92%, rgba(139, 92, 246, 0.20), transparent 62%),
+    radial-gradient(30% 28% at 22% 96%, rgba(244, 114, 182, 0.16), transparent 62%);
+  filter: blur(30px) saturate(120%);
+  animation: vm-drift 26s ease-in-out infinite alternate;
+}
+
+@keyframes vm-drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  100% {
+    transform: translate3d(0, -2.5%, 0) scale(1.06);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vm-aurora {
+    animation: none;
+  }
+}
+
 /* Thin, unobtrusive scrollbar that matches the all-white canvas. */
 ::-webkit-scrollbar {
   width: 10px;

@@ -185,11 +185,12 @@ export default function Home() {
   };
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-white">
+    <div className="relative flex h-screen w-full overflow-hidden bg-white">
+      <div className="vm-aurora" aria-hidden />
       <Sidebar />
 
       <main
-        className={`relative flex min-h-screen flex-1 flex-col items-center bg-white px-4 ${
+        className={`relative flex min-h-screen flex-1 flex-col items-center bg-transparent px-4 ${
           hasConversation ? "overflow-hidden" : "overflow-y-auto"
         }`}
       >

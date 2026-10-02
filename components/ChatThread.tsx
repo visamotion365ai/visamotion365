@@ -129,7 +129,7 @@ export default function ChatThread({ messages, isStreaming }: ChatThreadProps) {
       {messages.map((message, index) =>
         message.role === "user" ? (
           <div key={message.id} className="flex justify-end">
-            <div className="max-w-[85%] whitespace-pre-wrap rounded-2xl bg-neutral-100 px-4 py-2.5 text-[15px] text-neutral-900">
+            <div className="max-w-[85%] whitespace-pre-wrap rounded-2xl border border-neutral-200/70 bg-white/70 px-4 py-2.5 text-[15px] text-neutral-900 shadow-sm backdrop-blur-xl">
               {message.content}
             </div>
           </div>

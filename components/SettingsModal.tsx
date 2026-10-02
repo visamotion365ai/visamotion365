@@ -110,7 +110,7 @@ export default function SettingsModal() {
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/20 p-4 backdrop-blur-[1px]"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/10 p-4 backdrop-blur-md"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) setOpen(false);
       }}
@@ -119,10 +119,10 @@ export default function SettingsModal() {
         role="dialog"
         aria-modal="true"
         aria-label="API Keys and configuration"
-        className="max-h-[88vh] w-full max-w-[560px] overflow-y-auto rounded-2xl border border-neutral-200 bg-white shadow-xl"
+        className="max-h-[88vh] w-full max-w-[560px] overflow-y-auto rounded-2xl border border-neutral-200/70 bg-white/80 shadow-2xl backdrop-blur-2xl"
       >
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-start justify-between border-b border-neutral-100 bg-white px-5 py-4">
+        <div className="sticky top-0 z-10 flex items-start justify-between border-b border-neutral-200/70 bg-white/70 px-5 py-4 backdrop-blur-xl">
           <div className="flex items-start gap-3">
             <span className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-100">
               <ShieldCheck size={18} className="text-neutral-700" />
@@ -146,7 +146,7 @@ export default function SettingsModal() {
 
         <div className="space-y-5 px-5 py-5">
           {/* Browser Use */}
-          <section className="rounded-xl border border-neutral-200 p-4">
+          <section className="rounded-xl border border-neutral-200/70 bg-white/50 p-4 backdrop-blur-xl">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-sm font-medium text-neutral-900">Browser Use Cloud</h3>
               <StatusPill
@@ -183,7 +183,7 @@ export default function SettingsModal() {
           </section>
 
           {/* Base44 */}
-          <section className="rounded-xl border border-neutral-200 p-4">
+          <section className="rounded-xl border border-neutral-200/70 bg-white/50 p-4 backdrop-blur-xl">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-sm font-medium text-neutral-900">Base44 Workflow</h3>
               <StatusPill
@@ -224,7 +224,7 @@ export default function SettingsModal() {
           </section>
 
           {/* Primary LLM */}
-          <section className="rounded-xl border border-neutral-200 p-4">
+          <section className="rounded-xl border border-neutral-200/70 bg-white/50 p-4 backdrop-blur-xl">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-sm font-medium text-neutral-900">Primary LLM</h3>
               <StatusPill
@@ -294,7 +294,7 @@ export default function SettingsModal() {
         </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 flex items-center justify-between gap-3 border-t border-neutral-100 bg-white px-5 py-3">
+        <div className="sticky bottom-0 flex items-center justify-between gap-3 border-t border-neutral-200/70 bg-white/70 px-5 py-3 backdrop-blur-xl">
           <button
             type="button"
             onClick={() => {

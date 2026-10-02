@@ -55,7 +55,7 @@ export default function SearchOverlay({ onPrefill, onSelectAgent }: SearchOverla
 
   return (
     <div
-      className="fixed inset-0 z-[70] flex items-start justify-center bg-black/20 p-4 pt-[12vh] backdrop-blur-[1px]"
+      className="fixed inset-0 z-[70] flex items-start justify-center bg-black/10 p-4 pt-[12vh] backdrop-blur-md"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) setOpen(false);
       }}
@@ -64,7 +64,7 @@ export default function SearchOverlay({ onPrefill, onSelectAgent }: SearchOverla
         role="dialog"
         aria-modal="true"
         aria-label="Search"
-        className="w-full max-w-[560px] overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-xl"
+        className="w-full max-w-[560px] overflow-hidden rounded-2xl border border-neutral-200/70 bg-white/80 shadow-2xl backdrop-blur-2xl"
       >
         <div className="flex items-center gap-3 border-b border-neutral-100 px-4 py-3">
           <Search size={18} className="text-neutral-400" />
