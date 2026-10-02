@@ -202,7 +202,7 @@ export async function createBrowserTask(
   apiKey: string,
   options: BrowserTaskOptions = {},
 ): Promise<BrowserTask> {
-  const key = assertKey(apiKey);
+  const key = (apiKey || "").trim();
   if (!task || task.trim().length < 8) {
     throw new BrowserUseError("Describe the browser task in at least 8 characters.");
   }
@@ -233,7 +233,7 @@ export async function createBrowserTask(
     // else: fall through to a direct attempt
   }
 
-  return directCreate(key, task.trim(), options);
+  return directCreate(assertKey(key), task.trim(), options);
 }
 
 /** Poll a running task. */
@@ -242,10 +242,10 @@ export async function getBrowserTaskStatus(
   apiKey: string,
   timeoutMs = 20_000,
 ): Promise<BrowserTaskResult> {
-  const key = assertKey(apiKey);
+  const key = (apiKey || "").trim();
   if (!taskId) throw new BrowserUseError("Missing Browser Use task id.");
 
-  // Proxy first.
+  // Proxy first (the server may hold the key via BROWSER_USE_API_KEY).
   const proxied = await fetchWithTimeout(
     `${PROXY_PATH}?taskId=${encodeURIComponent(taskId)}&apiKey=${encodeURIComponent(key)}`,
     { method: "GET" },
@@ -267,7 +267,8 @@ export async function getBrowserTaskStatus(
   }
 
   // Direct fallback.
-  const headers = { "X-Browser-Use-API-Key": key, Authorization: `Bearer ${key}` };
+  const directKey = assertKey(key);
+  const headers = { "X-Browser-Use-API-Key": directKey, Authorization: `Bearer ${directKey}` };
   let direct = await fetchWithTimeout(
     `${BROWSER_USE_BASE}/api/v4/runs/${encodeURIComponent(taskId)}`,
     { method: "GET", headers },

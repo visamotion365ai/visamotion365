@@ -13,6 +13,7 @@
 // -----------------------------------------------------------------------------
 
 import { getAgent, type AgentId } from "./agents";
+import { runBase44Agent } from "./base44";
 
 export interface ChatMessage {
   id: string;
@@ -30,6 +31,9 @@ export interface ChatRequest {
   config?: {
     llmProvider?: string;
     llmKey?: string;
+    /** Base44 AI-agent workflow (preferred real engine when present). */
+    base44Key?: string;
+    base44Endpoint?: string;
   };
   signal?: AbortSignal;
 }
@@ -193,23 +197,13 @@ function sleep(ms: number, signal?: AbortSignal): Promise<void> {
   });
 }
 
-/**
- * Stream a response token-by-token. Replace the body with a real provider call
- * when a key is configured; the handlers contract stays the same.
- */
-export async function streamChat(
-  request: ChatRequest,
+/** Stream a string token-by-token so the UI behaves like a real model. */
+async function emit(
+  full: string,
+  signal: AbortSignal | undefined,
   handlers: ChatStreamHandlers,
+  realtime = false,
 ): Promise<void> {
-  const { agentId, messages, signal } = request;
-  const agent = getAgent(agentId);
-  const question = lastUser(messages);
-  const full = BUILDERS[agent.id](question || "No question provided.");
-
-  // Deep Reason mode "thinks" a little longer before the first token.
-  if (request.mode === "deep") await sleep(500, signal);
-
-  // Chunk on word boundaries so the stream looks like real tokens.
   const tokens = full.match(/\s*\S+/g) ?? [full];
   let emitted = "";
   try {
@@ -217,7 +211,7 @@ export async function streamChat(
       if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
       emitted += token;
       handlers.onToken(token);
-      await sleep(12 + Math.random() * 22, signal);
+      await sleep(realtime ? 6 + Math.random() * 10 : 12 + Math.random() * 22, signal);
     }
     handlers.onDone(emitted);
   } catch (error) {
@@ -227,6 +221,47 @@ export async function streamChat(
     }
     handlers.onError(error as Error);
   }
+}
+
+/**
+ * Stream a response. When a Base44 AI-agent workflow is configured (key or
+ * endpoint, client-side or via BASE44_API_KEY / BASE44_ENDPOINT), its real
+ * output is streamed back. Otherwise the agent-specific mock is used so the UI
+ * always answers.
+ */
+export async function streamChat(
+  request: ChatRequest,
+  handlers: ChatStreamHandlers,
+): Promise<void> {
+  const { agentId, messages, signal, config } = request;
+  const agent = getAgent(agentId);
+  const question = lastUser(messages) || "No question provided.";
+
+  const base44Key = config?.base44Key?.trim() ?? "";
+  const base44Endpoint = config?.base44Endpoint?.trim() ?? "";
+
+  if (base44Key || base44Endpoint) {
+    try {
+      const { output } = await runBase44Agent(
+        question,
+        agent.systemPrompt,
+        messages,
+        base44Key,
+        base44Endpoint,
+      );
+      await emit(output, signal, handlers, true);
+      return;
+    } catch (error) {
+      handlers.onToken(
+        `> Base44 agent unavailable — falling back to the built-in agent. (${(error as Error).message})\n\n`,
+      );
+    }
+  }
+
+  // Built-in agent fallback.
+  const full = BUILDERS[agent.id](question);
+  if (request.mode === "deep") await sleep(500, signal);
+  await emit(full, signal, handlers);
 }
 
 /** Exposed so a real provider can be wired in without touching the UI. */
