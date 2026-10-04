@@ -78,6 +78,7 @@ export default function SettingsModal() {
   const [browserState, setBrowserState] = useState<TestState>("idle");
   const [base44State, setBase44State] = useState<TestState>("idle");
   const [llmState, setLlmState] = useState<TestState>("idle");
+  const [connectionDetails, setConnectionDetails] = useState({ browser: "", base44: "", llm: "" });
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
@@ -98,11 +99,17 @@ export default function SettingsModal() {
     const setter =
       kind === "browser" ? setBrowserState : kind === "base44" ? setBase44State : setLlmState;
     setter("testing");
+    setConnectionDetails((current) => ({ ...current, [kind]: "Checking provider…" }));
     try {
-      await fn();
+      const result = await fn();
       setter("connected");
-    } catch {
+      setConnectionDetails((current) => ({ ...current, [kind]: result.detail }));
+    } catch (error) {
       setter("error");
+      setConnectionDetails((current) => ({
+        ...current,
+        [kind]: error instanceof Error ? error.message : "Connection failed. Check the key and try again.",
+      }));
     }
   };
 
@@ -130,7 +137,7 @@ export default function SettingsModal() {
             <div>
               <h2 className="text-base font-medium text-neutral-900">API Keys &amp; Config</h2>
               <p className="text-xs text-neutral-500">
-                Stored locally in your browser under <code className="rounded bg-neutral-100 px-1">visamotion_config</code>.
+                Saved in this browser. Keys are sent only when you test or run the matching provider, never in a URL.
               </p>
             </div>
           </div>
@@ -165,6 +172,7 @@ export default function SettingsModal() {
               <div className="flex gap-2">
                 <input
                   type={reveal ? "text" : "password"}
+                  autoComplete="new-password"
                   value={config.browserUseKey}
                   onChange={(event) => setConfig({ browserUseKey: event.target.value })}
                   placeholder="bu_..."
@@ -184,6 +192,11 @@ export default function SettingsModal() {
                 </button>
               </div>
             </Field>
+            {connectionDetails.browser && (
+              <p role="status" className={`mt-2 text-xs ${browserState === "error" ? "text-red-600" : "text-neutral-500"}`}>
+                {connectionDetails.browser}
+              </p>
+            )}
           </section>
 
           {/* Base44 */}
@@ -202,6 +215,7 @@ export default function SettingsModal() {
               >
                 <input
                   type={reveal ? "text" : "password"}
+                  autoComplete="new-password"
                   value={config.base44Key}
                   onChange={(event) => setConfig({ base44Key: event.target.value })}
                   placeholder="Paste your Base44 / superagent key"
@@ -211,7 +225,8 @@ export default function SettingsModal() {
               <Field label="Workflow Endpoint">
                 <div className="flex gap-2">
                   <input
-                    type="url"
+                  type="url"
+                  inputMode="url"
                     value={config.base44Endpoint}
                     onChange={(event) => setConfig({ base44Endpoint: event.target.value })}
                     placeholder="https://app.base44.com/api/..."
@@ -227,6 +242,11 @@ export default function SettingsModal() {
                   </button>
                 </div>
               </Field>
+              {connectionDetails.base44 && (
+                <p role="status" className={`text-xs ${base44State === "error" ? "text-red-600" : "text-neutral-500"}`}>
+                  {connectionDetails.base44}
+                </p>
+              )}
             </div>
           </section>
 
@@ -256,7 +276,8 @@ export default function SettingsModal() {
               <Field label="API Key">
                 <div className="flex gap-2">
                   <input
-                    type={reveal ? "text" : "password"}
+                  type={reveal ? "text" : "password"}
+                  autoComplete="new-password"
                     value={config.llmKey}
                     onChange={(event) => setConfig({ llmKey: event.target.value })}
                     placeholder="sk-..."
@@ -272,6 +293,11 @@ export default function SettingsModal() {
                   </button>
                 </div>
               </Field>
+              {connectionDetails.llm && (
+                <p role="status" className={`text-xs ${llmState === "error" ? "text-red-600" : "text-neutral-500"}`}>
+                  {connectionDetails.llm}
+                </p>
+              )}
               <Field label="Proxy Country" hint="Exit country for Browser Use Cloud runs.">
                 <select
                   value={config.proxyCountry}

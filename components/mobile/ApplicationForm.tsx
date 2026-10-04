@@ -305,7 +305,7 @@ export default function ApplicationForm({ initial, onOpenAssistant, onViewApplic
             </Field>
             <div className="mt-3 flex items-center gap-2 rounded-xl bg-neutral-50 px-3 py-2.5 text-[12px] text-neutral-500 dark:bg-white/5 dark:text-neutral-400">
               <Camera size={15} className="text-neutral-400" />
-              Attach documents from the Documents tab — the auditor agent will verify each one.
+              Case details stay on this device. AI prompts go to the provider you connect; do not add passport or bank numbers.
             </div>
           </>
         )}

@@ -1,125 +1,98 @@
 # VisaMotion 365
 
-A frontend-first **agentic AI workspace** for a global visa & immigration agency.
-The UI is a strict, all-white 1:1 replica of the Meta AI web interface: a slim
-icon sidebar, a centered hero, and a floating `rounded-[28px]` prompt bar.
+VisaMotion 365 is a mobile-first visa case workspace with five specialist AI
+personas, a real Browser Use Cloud task mode, provider-backed chat, and an
+installable progressive web app.
 
-> This is a workspaces/consultation tool. It is **not** legal advice and it never
-> logs in to or submits a government application on the applicant's behalf.
+It is a consultation and drafting tool, not legal advice. It does not sign in to,
+pay, or submit applications to government or appointment portals.
 
-## Stack
+## What works
 
-- **Next.js 14** (App Router) + React 18 + TypeScript (strict)
-- **Tailwind CSS** (all-white design system, `neutral` palette)
-- **Lucide React** icons
-- **Zustand** store (agent, config, chat, cloud tasks)
+- Eligibility, document review, statement drafting, refusal analysis, and portal
+  research use the selected live AI provider when one is configured.
+- Browser Agent mode starts and polls real Browser Use Cloud tasks through
+  same-origin server routes. Task IDs, status, output, and live-view links appear
+  in the workspace.
+- OpenAI, Gemini, Anthropic, Base44, and Browser Use keys have connection tests
+  in Settings. A test displays the provider's success or error message.
+- Mobile application drafts, theme, chat, and provider settings are saved in
+  this browser's local storage. They do not sync between devices or users.
+- The PWA uses network-first updates and an offline copy of previously visited
+  pages. API responses are not cached.
 
-## Five autonomous agents
-
-| # | Agent | Focus |
-|---|-------|-------|
-| 1 | Migration & Eligibility Strategist | CRS, Australia 189/190/491, UK Skilled Worker |
-| 2 | Document Auditor & Compliance Officer | Funds, ITR, PCC, medicals, apostille — PASS/FAIL/MISSING |
-| 3 | SOP & Cover Letter Architect | GTE-compliant statements, sponsorship letters |
-| 4 | Refusal Forensic & Re-Appeal Specialist | US 214(b), Schengen Art. 32/35, IRPR 179, UK 320 |
-| 5 | Embassy Slot & Autonomous Portal Agent | Browser Use Cloud tasks (VFS, TLScontact, CGI) |
-
-Switching an agent instantly changes the composer placeholder, the active-agent
-badge, and the system prompt used by `lib/chat.ts`.
-
-## Getting started
+## Start locally
 
 ```bash
-npm install
-npm run dev      # http://localhost:3000
-npm run build    # production build
+npm ci
+npm run dev
 npm run typecheck
+npm run lint
+npm run build
 ```
 
-## Configuration
+## Connect an AI provider
 
-Click the gear icon in the sidebar (or **Open Settings**) and add:
+Open **Settings** and enter one of:
 
-- **Browser Use Cloud** — `BROWSER_USE_API_KEY` (`bu_...`). Real API calls.
-- **Base44** — API key + workflow endpoint.
-- **Primary LLM** — OpenAI / Gemini / Anthropic key, plus proxy country.
+- OpenAI API key
+- Google Gemini API key
+- Anthropic API key
+- Base44 API key and HTTPS workflow endpoint
+- Browser Use Cloud API key (`bu_...`) for autonomous browser tasks
 
-Everything is stored in `localStorage` under **`visamotion_config`** and survives
-reload.
+Press **Test** before saving. Without a connected provider, the app reports that
+setup is required rather than presenting canned text as a real AI answer. API
+usage is billed by the provider on the account attached to that key.
 
-> **Security note:** this app is deliberately frontend-first, so keys live in the
-> browser and API calls are made from the browser. That is fine on a trusted
-> machine for personal use. For a team deployment, proxy these calls through a
-> server route and keep keys in server environment variables instead.
+Keys entered in Settings are stored in this browser's `localStorage`. They are
+sent to this app's same-origin route only when you test or use that provider;
+they are not included in URLs or written to the app database. Treat this like a
+personal-device app: browser extensions or scripts running on the same origin
+can access local storage. For a shared agency deployment, add authentication,
+encrypted per-user credential storage, and access controls before storing client
+records centrally.
 
-## Browser Use Cloud
+## Optional server keys
 
-`lib/browserUse.ts` is a production-ready wrapper:
+Set server-only values in `.env.local` for development or Vercel environment
+variables for a shared default provider. Never commit real keys.
 
-- `createBrowserTask(task, apiKey, options)` — tries the **v4 runs** endpoint
-  (`POST /api/v4/runs`), then transparently falls back to the **v2 tasks**
-  endpoint (`POST /api/v2/tasks`).
-- `getBrowserTaskStatus(taskId, apiKey)` — poll a run.
-- `testBrowserUseKey(apiKey)` — connectivity check used by Settings.
+| Variable | Purpose |
+| --- | --- |
+| `BROWSER_USE_API_KEY` | Default Browser Use Cloud credential |
+| `OPENAI_API_KEY` | Default OpenAI credential |
+| `GEMINI_API_KEY` | Default Gemini credential |
+| `ANTHROPIC_API_KEY` | Default Anthropic credential |
+| `BASE44_API_KEY` | Default Base44 credential |
+| `BASE44_ENDPOINT` | Base44 HTTPS workflow URL |
 
-Selecting the **Browser Agent Cloud v4** mode and sending a prompt launches a
-real task; it appears in **Active Cloud Browser Tasks** with a refresh button and
-live-view link. No login, payment or form submission is ever performed.
+## PWA and iOS
+
+The manifest, 192/512 px icons, Apple touch icon, safe-area layout, and network-
+first service worker are included. Android and desktop Chromium browsers can
+install from the browser prompt/menu. On iPhone or iPad, open the site in Safari,
+tap **Share**, then **Add to Home Screen**. The installed PWA launches standalone
+and uses the short label **VisaMotion**.
+
+An App Store-signed native iOS binary is not included: publishing one requires an
+Apple Developer account, Xcode on macOS, and signing/provisioning. See
+[`IOS_RELEASE.md`](./IOS_RELEASE.md) for the iOS release boundary.
+
+## Case and document privacy
+
+Case drafts are currently local to the device/browser and are not backed by
+Supabase or a team account. Prompts and conversation history are sent to the AI
+provider you select. Do not enter passport numbers, bank account numbers, or
+other sensitive identifiers. Uploaded files are currently shown in the local
+document list; they are not uploaded to a server or parsed into model context.
 
 ## Project structure
 
+```text
+app/                 Next.js pages and API routes
+components/           Desktop, mobile, settings, and install UI
+components/mobile/    Mobile workspace and case form
+lib/                  Agent personas, browser, provider, and local state logic
+public/               PWA manifest, service worker, and app icons
 ```
-app/
-  layout.tsx        Root layout + Inter font
-  page.tsx          Main composition + send/stream logic
-  globals.css       Tailwind + base styles
-components/
-  Sidebar.tsx       Slim icon sidebar with tooltips
-  AgentSelector.tsx Flyout popover (5 agents)
-  ActiveAgentBadge.tsx
-  HeroInput.tsx     Floating prompt bar + file upload
-  ActionGrid.tsx    6 quick-action cards
-  ChatThread.tsx    Streaming conversation + markdown-lite
-  SettingsModal.tsx Keys, tests, localStorage
-  CloudTasksPanel.tsx
-  DocumentVault.tsx
-  SearchOverlay.tsx
-lib/
-  agents.ts         Personas, quick actions, chips, modes
-  store.ts          Zustand store (visamotion_config)
-  browserUse.ts     Browser Use Cloud API wrapper
-  chat.ts           Streaming chat engine (mock, swappable)
-```
-
-## Mobile app + PWA
-
-The same app ships a phone layout that mirrors the reference "Visa AI" design:
-
-- Sticky header (menu · logo · profile), slide-out drawer (Home, Applications,
-  AI Assistant, Travel, Visa Guide, Documents, Notifications, Profile, Settings,
-  Dark Mode) and a multi-step **New Visa Application** form with real flag cards.
-- **Dark mode** is a real toggle, persisted to `localStorage` (`visamotion_theme`).
-- **Installable PWA**: `public/manifest.json`, `public/sw.js` (network-first) and
-  the icons in `public/icons/`. On Android/desktop Chrome the install prompt
-  appears; iOS users get Add-to-Home-Screen steps.
-
-## How the single prompt works
-
-The composer's default mode is **Browser Agent Cloud v4**, so one prompt launches
-a real Browser Use Cloud task, then polls it and streams the status + output into
-the thread. If no key is present it falls back to the AI agent (Base44, otherwise
-a built-in agent) with a clear message. Base44 is used as the reasoning engine for
-the non-browser modes.
-
-## Server-side keys (optional)
-
-Instead of pasting keys in Settings you can set them on the host (Vercel →
-Environment Variables), and the app will use them automatically:
-
-| Variable | Purpose |
-|----------|---------|
-| `BROWSER_USE_API_KEY` | Real Browser Use Cloud runs |
-| `BASE44_API_KEY` | Base44 AI-agent key |
-| `BASE44_ENDPOINT` | Base44 workflow endpoint (HTTPS) |
-
-See `.env.example`. Nothing is ever logged or committed.

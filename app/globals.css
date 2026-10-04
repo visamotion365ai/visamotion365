@@ -10,6 +10,9 @@ html,
 body {
   background: #ffffff;
   color: #171717;
+  max-width: 100%;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
 }
 
 * {
@@ -388,6 +391,7 @@ body {
   backdrop-filter: blur(22px) saturate(150%);
   -webkit-backdrop-filter: blur(22px) saturate(150%);
   box-shadow: 0 8px 26px -24px rgba(15, 32, 24, 0.6);
+  padding-top: max(1rem, env(safe-area-inset-top));
 }
 .vm-mark {
   display: inline-flex;
@@ -473,7 +477,7 @@ body {
 .vm-m-input {
   border-radius: 14px;
   padding: 11px 13px;
-  font-size: 14px;
+  font-size: 16px;
   color: #171717;
   border: 1px solid #e5e5e5;
   background: rgba(255, 255, 255, 0.92);
@@ -875,4 +879,12 @@ select.vm-m-input {
 }
 .dark .vm-composer textarea::placeholder {
   color: #6b7280;
+}
+
+@media (max-width: 767px) {
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
 }

@@ -83,8 +83,8 @@ export async function POST(request: NextRequest) {
 
   if (provider === "gemini") {
     const result = await check(
-      `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(key)}`,
-      { method: "GET" },
+      "https://generativelanguage.googleapis.com/v1beta/models",
+      { method: "GET", headers: { "x-goog-api-key": key } },
     );
     return result.ok
       ? NextResponse.json({ ok: true, detail: "Gemini key is valid." })
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-3-5-haiku-latest",
+        model: "claude-haiku-4-5-20251001",
         max_tokens: 1,
         messages: [{ role: "user", content: "ping" }],
       }),

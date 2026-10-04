@@ -1,29 +1,51 @@
-// -----------------------------------------------------------------------------
-// VisaMotion 365 — service worker.
-// Network-first: republishes arrive instantly; the last good copy is served
-// offline as a fallback. Never cache-first (that would pin old HTML).
-// -----------------------------------------------------------------------------
-const CACHE = "visamotion-v1";
+// Network-first keeps new releases current and uses the last good page offline.
+const CACHE = "visamotion-v2";
+const CORE = ["/", "/manifest.json", "/icons/icon-192.png", "/icons/icon-512.png"];
 
-self.addEventListener("install", () => self.skipWaiting());
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches
+      .open(CACHE)
+      .then((cache) => cache.addAll(CORE).catch(() => undefined))
+      .then(() => self.skipWaiting()),
+  );
+});
 
 self.addEventListener("activate", (event) => {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil(
+    caches
+      .keys()
+      .then((keys) => Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key))))
+      .then(() => self.clients.claim()),
+  );
 });
 
 self.addEventListener("fetch", (event) => {
   const request = event.request;
   if (request.method !== "GET") return;
+
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
+
+  if (url.pathname.startsWith("/api/")) {
+    event.respondWith(fetch(request, { cache: "no-store" }));
+    return;
+  }
 
   event.respondWith(
     fetch(request)
       .then((response) => {
-        const copy = response.clone();
-        caches.open(CACHE).then((cache) => cache.put(request, copy));
+        if (response.ok) {
+          const copy = response.clone();
+          event.waitUntil(caches.open(CACHE).then((cache) => cache.put(request, copy)));
+        }
         return response;
       })
-      .catch(() => caches.match(request).then((hit) => hit || caches.match("/")))
+      .catch(async () => {
+        const cached = await caches.match(request);
+        if (cached) return cached;
+        if (request.mode === "navigate") return (await caches.match("/")) ?? Response.error();
+        return Response.error();
+      }),
   );
 });

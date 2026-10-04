@@ -46,7 +46,6 @@ function detailOf(data: Json, status: number): string {
 async function forward(
   url: string,
   init: RequestInit,
-  key: string,
   timeoutMs = 30000,
 ): Promise<{ ok: boolean; status: number; data: Json }> {
   try {
@@ -108,7 +107,6 @@ export async function POST(request: NextRequest) {
         max_steps: typeof body.maxSteps === "number" ? body.maxSteps : 20,
       }),
     },
-    apiKey,
   );
 
   const v4picked = pick(v4.data);
@@ -135,7 +133,6 @@ export async function POST(request: NextRequest) {
           proxyCountryCode,
         }),
       },
-      apiKey,
     );
     const v2picked = pick(v2.data);
     if (v2.ok && v2picked.id) {
@@ -145,52 +142,4 @@ export async function POST(request: NextRequest) {
   }
 
   return fail(redact(detailOf(v4.data, v4.status), apiKey), v4.status && v4.status !== 504 ? v4.status : 422);
-}
-
-export async function GET(request: NextRequest) {
-  const params = request.nextUrl.searchParams;
-  const taskId = params.get("taskId") ?? "";
-  const apiKey =
-    (params.get("apiKey") ?? "").trim() || (process.env.BROWSER_USE_API_KEY ?? "").trim();
-
-  if (!apiKey) return fail("Add your Browser Use API key in Settings, or set BROWSER_USE_API_KEY.", 401);
-  if (!taskId) return fail("Missing taskId.");
-
-  const headers = {
-    "X-Browser-Use-API-Key": apiKey,
-    Authorization: `Bearer ${apiKey}`,
-  };
-
-  let result = await forward(
-    `${BU_BASE}/api/v4/runs/${encodeURIComponent(taskId)}`,
-    { method: "GET", headers },
-    apiKey,
-    20000,
-  );
-
-  if (!result.ok) {
-    result = await forward(
-      `${BU_BASE}/api/v2/tasks/${encodeURIComponent(taskId)}`,
-      { method: "GET", headers },
-      apiKey,
-      20000,
-    );
-  }
-
-  if (!result.ok) {
-    return fail(redact(detailOf(result.data, result.status), apiKey), result.status !== 504 ? result.status : 422);
-  }
-
-  const data = result.data;
-  return NextResponse.json({
-    id: taskId,
-    status: String(data.status ?? data.state ?? "started"),
-    output:
-      typeof data.output === "string"
-        ? (data.output as string).slice(0, 20000)
-        : typeof data.result === "string"
-          ? (data.result as string).slice(0, 20000)
-          : "",
-    isSuccess: (data.isSuccess as boolean | undefined) ?? null,
-  });
 }

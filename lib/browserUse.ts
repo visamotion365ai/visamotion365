@@ -247,8 +247,12 @@ export async function getBrowserTaskStatus(
 
   // Proxy first (the server may hold the key via BROWSER_USE_API_KEY).
   const proxied = await fetchWithTimeout(
-    `${PROXY_PATH}?taskId=${encodeURIComponent(taskId)}&apiKey=${encodeURIComponent(key)}`,
-    { method: "GET" },
+    `${PROXY_PATH}/status`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ taskId, apiKey: key }),
+    },
     timeoutMs,
   );
   if (proxied) {

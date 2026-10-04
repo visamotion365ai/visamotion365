@@ -1,15 +1,6 @@
 // -----------------------------------------------------------------------------
-// lib/chat.ts
-// Chat engine for VisaMotion 365.
-//
-// For a frontend-first demo the default engine is a *mock streamer*: it uses the
-// active agent's system prompt to shape a structured, agent-specific answer and
-// emits it token-by-token so the UI streaming behaviour is realistic.
-//
-// A real provider (OpenAI / Gemini / Anthropic) can be dropped in by replacing
-// `mockStream` with `providerStream` — the signature and streaming contract are
-// identical. The Settings modal collects the key, and `ChatRequest.config`
-// carries it through.
+// Chat engine for VisaMotion 365. Live provider calls run through same-origin
+// routes so provider credentials are not exposed to third-party browser APIs.
 // -----------------------------------------------------------------------------
 
 import { getAgent, type AgentId } from "./agents";
@@ -27,11 +18,9 @@ export interface ChatRequest {
   agentId: AgentId;
   messages: ChatMessage[];
   mode?: "browser" | "instant" | "deep";
-  /** Optional API key if a real provider is wired in. */
   config?: {
     llmProvider?: string;
     llmKey?: string;
-    /** Base44 AI-agent workflow (preferred real engine when present). */
     base44Key?: string;
     base44Endpoint?: string;
   };
@@ -68,121 +57,6 @@ function lastUser(messages: ChatMessage[]): string {
   return "";
 }
 
-// -- Agent-specific mock answer builders --------------------------------------
-
-function strategistAnswer(q: string): string {
-  return `**Eligibility snapshot** (draft — verify every threshold on the official portal)
-
-I read your profile as: ${q.slice(0, 220)}
-
-**1. Points estimate**
-| Factor | Assumed | Note |
-| --- | --- | --- |
-| Age | from profile | max points 25–30 |
-| Education | from profile | bachelor/master band |
-| Language | from profile | CLB 9+ unlocks the top band |
-| Skilled experience | from profile | 3+ yrs is a common cut-off |
-
-**2. Best pathways**
-- Canada — Express Entry (CRS) or a PNP nomination
-- Australia — subclass 189 / 190 / 491 points test
-- UK — Skilled Worker, confirm the going-rate salary on GOV.UK
-
-**3. Highest-leverage improvement**
-The single factor that usually moves a score fastest is language: a jump from CLB 8 to CLB 9 can add enough CRS points to change an invitation outcome.
-
-**4. Must confirm**
-Current draw cut-offs, salary thresholds and processing times change frequently — confirm on the official authority before advising the applicant. This is not legal advice.`;
-}
-
-function auditorAnswer(q: string): string {
-  return `**Document audit** — items supplied: ${q.slice(0, 200)}
-
-| # | Document | Status | Action |
-| --- | --- | --- | --- |
-| 1 | Passport (6+ months validity) | PASS / FAIL | verify expiry at travel date |
-| 2 | Bank statements (maintenance funds) | WARN | confirm the exact 28-day balance rule |
-| 3 | Income tax returns | MISSING | provide last 2 assessment years |
-| 4 | Police clearance (PCC) | MISSING | order early — validity varies |
-| 5 | Medical exams | MISSING | book panel physician |
-| 6 | Degree + transcripts | WARN | apostille / notarise as required |
-| 7 | Sponsor affidavit | MISSING | include sponsor ID + relationship proof |
-
-**Verdict:** documentation is incomplete. Fix MISSING items first; they are the usual refusal triggers. Re-run this audit after upload so every row can be marked PASS.`;
-}
-
-function writerAnswer(q: string): string {
-  return `**Statement of Purpose — first draft**
-
-*Context used:* ${q.slice(0, 200)}
-
-To the Visa Officer,
-
-I am writing to explain my purpose of travel and why I will return to my home country once my studies/assignment conclude. My decision is deliberate, not opportunistic: [reason specific to the applicant], and it builds directly on my experience in [field].
-
-Why this destination and programme/role: [specific link to the curriculum or job duties] — not a generic choice, but the shortest credible route to my goal. Funding is arranged from [source], and the attached documents evidence every figure.
-
-Ties to home: my [family/property/employment offer] means my long-term future is anchored in [home country]. I intend to comply fully with the conditions of the visa and to leave before it expires.
-
-I would be glad to provide any further document.
-
-Sincerely,
-[Applicant name — replace before sending]
-
-**Editor notes:** I replaced no facts you did not provide, and every bracketed placeholder must be filled. Read it aloud and swap anything that does not sound like the applicant.`;
-}
-
-function forensicAnswer(q: string): string {
-  return `**Refusal forensic breakdown**
-
-*From the material provided:* ${q.slice(0, 200)}
-
-**1. Quoted ground**
-Isolate the exact paragraph the officer relied on (e.g. US INA 214(b), Schengen Article 32, Canada IRPR 179, UK paragraph 320).
-
-**2. What the officer actually doubted**
-Usually one of: ties to home, credibility of funds, purpose of visit, or the applicant's ability to answer consistently at interview.
-
-**3. The evidence gap**
-Map each doubt to the document that should have closed it. Most refusals are evidence failures, not merit failures.
-
-**4. Rebuttal structure for re-application**
-- Address each ground in the same order the officer raised it
-- Attach new, verifiable evidence — never a bare assertion
-- Add a short factual cover note, not an emotional appeal
-
-**5. Reality check**
-Some refusals are correct on the facts. If the underlying profile is weak, a re-application without a material change will usually fail again. A licensed lawyer should review before filing.`;
-}
-
-function portalAnswer(q: string): string {
-  return `**Portal / slot plan** — request: ${q.slice(0, 200)}
-
-I can launch a **Browser Use Cloud** task to check public appointment availability (VFS Global, TLScontact, CGI Federal) and to read the official guidance. I will **not** log in, enter personal data, pay, or submit any form — you complete the booking yourself.
-
-**Task I would run**
-"Open the official [country] appointment portal, check the earliest available [visa type] slot in [city], capture the current public guidance, and cite the exact URL."
-
-**Interview Q&A simulation**
-1. Purpose of your visit? — one sentence, matched to your documents.
-2. Who is funding you and how? — name the source and the paper trail.
-3. Why will you return home? — concrete ties, not sentiment.
-4. Why this institution/employer? — specific, researched detail.
-5. What if the visa is refused? — stay factual and calm.
-
-Confirm the country, city and visa type and I will launch the cloud browser task now.`;
-}
-
-const BUILDERS: Record<AgentId, (q: string) => string> = {
-  strategist: strategistAnswer,
-  auditor: auditorAnswer,
-  writer: writerAnswer,
-  forensic: forensicAnswer,
-  portal: portalAnswer,
-};
-
-// -- Streaming ---------------------------------------------------------------
-
 function sleep(ms: number, signal?: AbortSignal): Promise<void> {
   return new Promise((resolve, reject) => {
     const timer = setTimeout(resolve, ms);
@@ -197,12 +71,10 @@ function sleep(ms: number, signal?: AbortSignal): Promise<void> {
   });
 }
 
-/** Stream a string token-by-token so the UI behaves like a real model. */
 async function emit(
   full: string,
   signal: AbortSignal | undefined,
   handlers: ChatStreamHandlers,
-  realtime = false,
 ): Promise<void> {
   const tokens = full.match(/\s*\S+/g) ?? [full];
   let emitted = "";
@@ -211,7 +83,7 @@ async function emit(
       if (signal?.aborted) throw new DOMException("Aborted", "AbortError");
       emitted += token;
       handlers.onToken(token);
-      await sleep(realtime ? 6 + Math.random() * 10 : 12 + Math.random() * 22, signal);
+      await sleep(7, signal);
     }
     handlers.onDone(emitted);
   } catch (error) {
@@ -223,22 +95,43 @@ async function emit(
   }
 }
 
-/**
- * Stream a response. When a Base44 AI-agent workflow is configured (key or
- * endpoint, client-side or via BASE44_API_KEY / BASE44_ENDPOINT), its real
- * output is streamed back. Otherwise the agent-specific mock is used so the UI
- * always answers.
- */
+async function runLiveLlm(
+  provider: string,
+  apiKey: string,
+  system: string,
+  messages: ChatMessage[],
+  signal?: AbortSignal,
+): Promise<string> {
+  const response = await fetch("/api/llm", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      provider,
+      apiKey,
+      system,
+      messages: messages.slice(-16).map(({ role, content }) => ({ role, content })),
+    }),
+    signal,
+  });
+  const data = (await response.json().catch(() => ({}))) as {
+    output?: string;
+    error?: string;
+  };
+  if (!response.ok) throw new Error(data.error ?? `AI provider returned HTTP ${response.status}.`);
+  if (!data.output?.trim()) throw new Error("The AI provider returned an empty response.");
+  return data.output;
+}
+
 export async function streamChat(
   request: ChatRequest,
   handlers: ChatStreamHandlers,
 ): Promise<void> {
   const { agentId, messages, signal, config } = request;
   const agent = getAgent(agentId);
-  const question = lastUser(messages) || "No question provided.";
-
+  const question = lastUser(messages);
   const base44Key = config?.base44Key?.trim() ?? "";
   const base44Endpoint = config?.base44Endpoint?.trim() ?? "";
+  let base44Error = "";
 
   if (base44Key || base44Endpoint) {
     try {
@@ -249,22 +142,38 @@ export async function streamChat(
         base44Key,
         base44Endpoint,
       );
-      await emit(output, signal, handlers, true);
+      await emit(output, signal, handlers);
       return;
     } catch (error) {
-      handlers.onToken(
-        `> Base44 agent unavailable — falling back to the built-in agent. (${(error as Error).message})\n\n`,
-      );
+      if (signal?.aborted) return;
+      base44Error = `Base44 could not respond: ${(error as Error).message}`;
     }
   }
 
-  // Built-in agent fallback.
-  const full = BUILDERS[agent.id](question);
-  if (request.mode === "deep") await sleep(500, signal);
-  await emit(full, signal, handlers);
+  if (config?.llmKey?.trim()) {
+    try {
+      const output = await runLiveLlm(
+        config.llmProvider ?? "openai",
+        config.llmKey,
+        agent.systemPrompt,
+        messages,
+        signal,
+      );
+      if (base44Error) handlers.onToken(`> ${base44Error}; using your selected AI provider instead.\n\n`);
+      await emit(output, signal, handlers);
+      return;
+    } catch (error) {
+      if ((error as Error).name === "AbortError" || signal?.aborted) return;
+      handlers.onError(error as Error);
+      return;
+    }
+  }
+
+  const setupHint =
+    "No live AI provider is configured. Open Settings and add an OpenAI, Gemini, Claude, or Base44 key to run this agent.";
+  handlers.onError(new Error(base44Error ? `${base44Error}. ${setupHint}` : setupHint));
 }
 
-/** Exposed so a real provider can be wired in without touching the UI. */
 export function buildSystemPrompt(agentId: AgentId): string {
   return getAgent(agentId).systemPrompt;
 }

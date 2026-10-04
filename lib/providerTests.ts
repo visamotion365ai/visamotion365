@@ -72,7 +72,8 @@ export async function testConnection(
   }
   if (provider === "gemini") {
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(key.trim())}`,
+      "https://generativelanguage.googleapis.com/v1beta/models",
+      { headers: { "x-goog-api-key": key.trim() } },
     );
     if (!res.ok) throw new Error(`Gemini returned HTTP ${res.status}.`);
     return { ok: true, detail: "Gemini key is valid." };
@@ -87,7 +88,7 @@ export async function testConnection(
         "anthropic-dangerous-direct-browser-access": "true",
       },
       body: JSON.stringify({
-        model: "claude-3-5-haiku-latest",
+        model: "claude-haiku-4-5-20251001",
         max_tokens: 1,
         messages: [{ role: "user", content: "ping" }],
       }),
