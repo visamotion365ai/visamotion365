@@ -1,29 +1,33 @@
 {
   "name": "visamotion365",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "private": true,
-  "description": "VisaMotion 365 - agentic AI workspace for a global visa & immigration agency. Meta AI style UI.",
+  "description": "Multi-tenant visa operations platform — intake, OCR, compliance, dossiers, AI agent orchestration, browser automation, approvals, billing.",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -H 0.0.0.0 -p 3000",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "start": "next start -H 0.0.0.0 -p 3000",
+    "seed": "tsx scripts/seed.ts",
+    "test": "tsx scripts/test.ts"
   },
   "dependencies": {
-    "lucide-react": "0.454.0",
-    "next": "14.2.35",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
-    "zustand": "4.5.5"
+    "framer-motion": "^12.0.0",
+    "lucide-react": "^0.469.0",
+    "next": "^15.3.0",
+    "pdf-lib": "^1.17.1",
+    "qrcode": "^1.5.4",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
   },
   "devDependencies": {
-    "@types/node": "20.14.10",
-    "@types/react": "18.3.3",
-    "@types/react-dom": "18.3.0",
-    "autoprefixer": "10.4.20",
-    "postcss": "8.4.47",
-    "tailwindcss": "3.4.14",
-    "typescript": "5.5.4"
+    "@types/node": "^22.10.0",
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
   }
 }

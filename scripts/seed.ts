@@ -1,0 +1,16 @@
+import { reseed } from "../src/lib/db";
+const db = reseed();
+console.log("✅ Seeded VisaMotion365 demo data:");
+console.log(`   tenants: ${db.tenants.length}`);
+console.log(`   applicants: ${db.applicants.length}`);
+console.log(`   agents: ${db.ai_agents.length}`);
+console.log(`   documents: ${db.client_documents.length}`);
+console.log(`   approvals: ${db.approval_requests.length}`);
+console.log(`   agent runs: ${db.agent_runs.length}`);
+console.log("\nDemo logins (dev only):");
+console.log("   superadmin@example.com / SuperAdmin123!  (MFA: code shown on screen)");
+console.log("   owner.wvc@example.com / Owner123!");
+console.log("   owner.vfs@example.com / Owner123!");
+console.log("   visa.officer@example.com / Officer123!");
+console.log("   document.officer@example.com / Officer123!");
+console.log("   demo.applicant@example.com / Applicant123!");
